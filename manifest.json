@@ -1,0 +1,17 @@
+{
+  "description": "Removes the persistent player from twitch.tv on the About, Schedule, and Videos pages",
+  "manifest_version": 2,
+  "name": "Twitch Persistent Player Removal",
+  "version": "1.0",
+  "homepage_url": "https://github.com/rob-slezak/",
+  "icons": {
+    "48": "icons/icon-48.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.twitch.tv/*"],
+      "js": ["playerRemoval.js"]
+    }
+  ]
+}
