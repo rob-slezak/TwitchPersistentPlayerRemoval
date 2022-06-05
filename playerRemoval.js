@@ -36,9 +36,9 @@ function removeVideoPlayer() {
 			location.reload();
 		}
 		else {
-			rootContent.style.marginTop = "468px";
-			content.style.width = "";
-
+			rootContent.classList.remove("hideRootContent");
+			content.classList.remove("hideContent");
+			
 			clearInterval(videoInterval);
 			var player = document.getElementsByTagName("video")[0];
 			if (player) {
@@ -47,9 +47,9 @@ function removeVideoPlayer() {
 		}
 	}
 	else {
-		rootContent.style.marginTop = "0px";
-		content.style.width = "100%";
-		
+		rootContent.classList.add("hideRootContent");
+		content.classList.add("hideContent");
+
 		clearInterval(videoInterval);
 		if (!playerDeleted) {
 			videoInterval = setInterval(checkVideo, 1000);
