@@ -2,6 +2,34 @@ var playerDeleted = false;
 var shiftContent = false;
 var deletePlayer = false;
 var oldHref = '';
+var videoInterval = null;
+
+function automaticVodBtns() {
+	clearInterval(videoInterval);
+	var player = document.getElementsByTagName("video")[0];
+	if (player) {
+		player.ontimeupdate = null;
+	}
+
+	// Automatically collapses chat
+	var collapseBtn = document.querySelectorAll('[aria-label="Collapse Chat"]');
+	if (collapseBtn.length > 0) {
+		collapseBtn[0].click();
+	}
+
+	// Automatically enters theatre mode
+	var theatreBtn = document.querySelectorAll('[aria-label="Theatre Mode (alt+t)"]');
+	if (theatreBtn.length > 0) {
+		theatreBtn[0].click();
+	}
+}
+
+function checkVideoPlayer() {
+	var player = document.getElementsByTagName("video")[0];
+	if (player) {
+		player.ontimeupdate = automaticVodBtns;
+	}
+}
 
 // Deletes the video player nodes from the DOM
 function deleteNodes() {
@@ -29,6 +57,11 @@ function checkUrl() {
 	else {
 		shiftContent = true;
 		deletePlayer = true;
+	}
+
+	var vodUrl = document.location.href.match(new RegExp("twitch.tv/videos/.*"));
+	if (vodUrl != null) {
+		videoInterval = setInterval(checkVideoPlayer, 1000);
 	}
 }
 
@@ -60,7 +93,7 @@ function removeVideoPlayer() {
 	}
 }
 
-// Checks for changes to the url
+// Checks for changes to the page
 var urlObserver = new MutationObserver(function(mutations) {
 	mutations.forEach(function(mutation) {
 		if (oldHref != document.location.href) {
