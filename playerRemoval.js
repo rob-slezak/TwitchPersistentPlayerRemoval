@@ -1,7 +1,7 @@
 var playerDeleted = false;
 var shiftContent = false;
-var videoInterval = null;
-var oldHref = document.location.href;
+var deletePlayer = false;
+var oldHref = '';
 
 // Deletes the video player nodes from the DOM
 function deleteNodes() {
@@ -13,24 +13,9 @@ function deleteNodes() {
 	playerDeleted = true;
 }
 
-// Waits until the video player is loaded to add an onTimeUpdate to delete the DOM node
-// This delay is necessary because if the video player is not fully loaded when we
-// remove the DOM Node the video will continue loading in the background for some reason
-function checkVideo() {
-	var player = document.getElementsByTagName("video")[0];
-	if (player) {
-		player.ontimeupdate = deleteNodes;
-		clearInterval(videoInterval);
-	}
-}
-
-// Handles tweaking the css for the page and adding/removing the interval to delete the video player DOM Node based on the url for the page
-function removeVideoPlayer() {
+function checkUrl() {
 	var match = document.location.href.match(new RegExp("twitch.tv/.*/(videos|about|schedule)"));
 	
-	var rootContent = document.getElementsByClassName("channel-root__info")[0];
-	var content = document.getElementsByClassName("channel-info-content")[0];
-
 	if (match == null) {
 		if (playerDeleted) {
 			//trigger page reload to restore video player
@@ -38,25 +23,40 @@ function removeVideoPlayer() {
 		}
 		else {
 			shiftContent = false;
-			rootContent.classList.remove("hideRootContent");
-			content.classList.remove("hideContent");
-			
-			clearInterval(videoInterval);
-			var player = document.getElementsByTagName("video")[0];
-			if (player) {
-				player.ontimeupdate = null;
-			}
+			deletePlayer = false;
 		}
 	}
 	else {
 		shiftContent = true;
+		deletePlayer = true;
+	}
+}
+
+function applyContentShift() {
+	var rootContent = document.getElementsByClassName("channel-root__info")[0];
+	var content = document.getElementsByClassName("channel-info-content")[0];
+	if (shiftContent) {
 		rootContent.classList.add("hideRootContent");
 		content.classList.add("hideContent");
+	}
+	else {
+		rootContent.classList.remove("hideRootContent");
+		content.classList.remove("hideContent");
+	}
+}
 
-		clearInterval(videoInterval);
-		if (!playerDeleted) {
-			videoInterval = setInterval(checkVideo, 1000);
-		}
+function removeVideoPlayer() {
+	var players = document.getElementsByTagName("video");
+	
+	if (players.length > 0) {
+		for (let player of players) {
+			if (deletePlayer) {
+				player.ontimeupdate = deleteNodes;
+			}
+			else {
+				player.ontimeupdate = null;
+			}
+		}	
 	}
 }
 
@@ -65,23 +65,14 @@ var urlObserver = new MutationObserver(function(mutations) {
 	mutations.forEach(function(mutation) {
 		if (oldHref != document.location.href) {
 			oldHref = document.location.href;
-			removeVideoPlayer();
-		}
-		
-		var rootContent = document.getElementsByClassName("channel-root__info")[0];
-		var content = document.getElementsByClassName("channel-info-content")[0];
-		if (shiftContent) {
-			rootContent.classList.add("hideRootContent");
-			content.classList.add("hideContent");
-		}
-		else {
-			rootContent.classList.remove("hideRootContent");
-			content.classList.remove("hideContent");
+			checkUrl();
 		}
 
+		applyContentShift();
+
+		removeVideoPlayer();
 	});
 });
 
-// Initial page load check and sets up observer for url changes
-removeVideoPlayer();
+// Initial page load sets up observer for url changes
 urlObserver.observe(document, { childList: true, subtree: true });
