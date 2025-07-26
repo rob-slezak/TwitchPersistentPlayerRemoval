@@ -2,7 +2,7 @@ var playerDeleted = false;
 var shiftContent = false;
 var deletePlayer = false;
 var oldHref = '';
-var videoInterval = null;
+var videoInterval = undefined;
 
 function automaticVodBtns() {
 	clearInterval(videoInterval);
@@ -36,9 +36,15 @@ function deleteNodes() {
 	var player = document.getElementsByClassName("persistent-player");
 	var rootPlayer = document.getElementsByClassName("channel-root__player");
 	
-	player[0].parentElement.removeChild(player[0]);
-	rootPlayer[0].parentElement.removeChild(rootPlayer[0]);
-	playerDeleted = true;
+	if (player.length > 0 && player[0].parentElement) {
+		player[0].parentElement.removeChild(player[0]);
+		playerDeleted = true;
+	}
+
+	if (rootPlayer.length > 0 && rootPlayer[0].parentElement) {
+		rootPlayer[0].parentElement.removeChild(rootPlayer[0]);
+		playerDeleted = true;
+	}
 }
 
 function checkUrl() {
@@ -67,14 +73,23 @@ function checkUrl() {
 
 function applyContentShift() {
 	var rootContent = document.getElementsByClassName("channel-root__info")[0];
-	var content = document.getElementsByClassName("channel-info-content")[0];
-	if (shiftContent) {
-		rootContent.classList.add("hideRootContent");
-		content.classList.add("hideContent");
+	if (rootContent) {
+		if (shiftContent) {
+			rootContent.classList.add("hideRootContent");
+		}
+		else {
+			rootContent.classList.remove("hideRootContent");
+		}
 	}
-	else {
-		rootContent.classList.remove("hideRootContent");
-		content.classList.remove("hideContent");
+
+	var content = document.getElementsByClassName("channel-info-content")[0];
+	if (content) {
+		if (shiftContent) {
+			content.classList.add("hideContent");
+		}
+		else {
+			content.classList.remove("hideContent");
+		}
 	}
 }
 
